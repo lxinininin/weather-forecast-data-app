@@ -15,26 +15,29 @@ st.subheader(f"{option} for the next {days} days in {place}")
 
 # we have to make sure the place is entered, or we will get an error
 if place:
-    # get the temperature/sky data
-    filtered_data = get_data(place, days)
+    try:
+        # get the temperature/sky data
+        filtered_data = get_data(place, days)
 
-    if option == "Temperature":
-        temperatures = [dict["main"]["temp"] for dict in filtered_data]
-        dates = [dict["dt_txt"] for dict in filtered_data]
+        if option == "Temperature":
+            temperatures = [dict["main"]["temp"] / 10 for dict in filtered_data]
+            dates = [dict["dt_txt"] for dict in filtered_data]
 
-        # create temperature line graph plot
-        figure = px.line(x=dates, y=temperatures, labels={"x": "Date", "y": "Temperature (C)"})
-        st.plotly_chart(figure)
+            # create temperature line graph plot
+            figure = px.line(x=dates, y=temperatures, labels={"x": "Date", "y": "Temperature (C)"})
+            st.plotly_chart(figure)
 
-    if option == "Sky":
-        # watch out of the data structure of filtered_data, we can use debugger to identify it easily
-        sky_conditions = [dict["weather"][0]["main"] for dict in filtered_data]
+        if option == "Sky":
+            # watch out of the data structure of filtered_data, we can use debugger to identify it easily
+            sky_conditions = [dict["weather"][0]["main"] for dict in filtered_data]
 
-        images = {"Clear": "images/clear.png",
-                  "Clouds": "images/cloud.png",
-                  "Rain": "images/rain.png",
-                  "Snow": "images/snow.png"}
-        image_paths = [images[condition] for condition in sky_conditions]
+            images = {"Clear": "images/clear.png",
+                      "Clouds": "images/cloud.png",
+                      "Rain": "images/rain.png",
+                      "Snow": "images/snow.png"}
+            image_paths = [images[condition] for condition in sky_conditions]
 
-        # create sky image
-        st.image(image_paths, width=115)
+            # create sky image
+            st.image(image_paths, width=115)
+    except KeyError:
+        st.error("That place does not exist")
