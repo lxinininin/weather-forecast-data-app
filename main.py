@@ -13,9 +13,28 @@ option = st.selectbox("Select data to view", ("Temperature", "Sky"))
 
 st.subheader(f"{option} for the next {days} days in {place}")
 
-data = get_data(place, days, option)
+# we have to make sure the place is entered, or we will get an error
+if place:
+    # get the temperature/sky data
+    filtered_data = get_data(place, days)
 
-d, t = get_data(days)
-# we create line graph here
-figure = px.line(x=d, y=t, labels={"x": "Date", "y": "Temperature (C)"})
-st.plotly_chart(figure)
+    if option == "Temperature":
+        temperatures = [dict["main"]["temp"] for dict in filtered_data]
+        dates = [dict["dt_txt"] for dict in filtered_data]
+
+        # create temperature line graph plot
+        figure = px.line(x=dates, y=temperatures, labels={"x": "Date", "y": "Temperature (C)"})
+        st.plotly_chart(figure)
+
+    if option == "Sky":
+        # watch out of the data structure of filtered_data, we can use debugger to identify it easily
+        sky_conditions = [dict["weather"][0]["main"] for dict in filtered_data]
+
+        images = {"Clear": "images/clear.png",
+                  "Clouds": "images/cloud.png",
+                  "Rain": "images/rain.png",
+                  "Snow": "images/snow.png"}
+        image_paths = [images[condition] for condition in sky_conditions]
+
+        # create sky image
+        st.image(image_paths, width=115)
